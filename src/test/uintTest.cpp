@@ -1,5 +1,5 @@
 #include "uintTest.h"
-#include "uint.h"
+#include "libpow/uint.h"
 
 template<unsigned Bits>
 static inline bool cmphex(const UInt<Bits> &v, const std::string &ref, const char *file, unsigned line) {

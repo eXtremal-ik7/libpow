@@ -1,4 +1,4 @@
-#include "sha256.h"
+#include "libpow/sha256.h"
 #include "endianc.h"
 #include <string.h>
 #ifdef LIBPOW_SHANI_ENABLED

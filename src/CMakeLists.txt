@@ -58,7 +58,7 @@ add_library(pow
   sha3.c
 )
 
-target_include_directories(pow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(pow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # _Alignas in scrypt.c: C11, which MSVC needs asked for
 set_target_properties(pow PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)

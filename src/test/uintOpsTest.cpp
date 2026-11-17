@@ -2,7 +2,7 @@
 // The tables in uintOpsVectors.h come from an outside source (python big ints),
 // and the random part checks identities a table cannot reach
 #include "uintOpsTest.h"
-#include "uint.h"
+#include "libpow/uint.h"
 #include <stdio.h>
 
 namespace {

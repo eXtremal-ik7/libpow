@@ -5,7 +5,7 @@
 // on unaligned input
 #include "sha3Test.h"
 #include "hashTestUtils.h"
-#include "sha3.h"
+#include "libpow/sha3.h"
 #include <string.h>
 #include <vector>
 

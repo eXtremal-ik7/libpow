@@ -1,5 +1,5 @@
-#include "scrypt.h"
-#include "sha256.h"
+#include "libpow/scrypt.h"
+#include "libpow/sha256.h"
 #include "endianc.h"
 #include <stddef.h>
 #include <stdlib.h>

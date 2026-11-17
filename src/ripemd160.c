@@ -1,4 +1,4 @@
-#include "ripemd160.h"
+#include "libpow/ripemd160.h"
 #include "endianc.h"
 #include <string.h>
 

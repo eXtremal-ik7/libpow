@@ -4,7 +4,7 @@
 // block of length only, and whole blocks - on unaligned input
 #include "ripemd160Test.h"
 #include "hashTestUtils.h"
-#include "ripemd160.h"
+#include "libpow/ripemd160.h"
 #include <string.h>
 #include <vector>
 

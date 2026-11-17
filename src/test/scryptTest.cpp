@@ -4,7 +4,7 @@
 // out under the target of its own header
 #include "scryptTest.h"
 #include "hashTestUtils.h"
-#include "scrypt.h"
+#include "libpow/scrypt.h"
 #include <string.h>
 
 namespace {

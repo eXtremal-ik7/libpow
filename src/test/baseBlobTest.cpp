@@ -1,3 +1,3 @@
 #include "baseBlobTest.h"
-#include "baseBlob.h"
+#include "libpow/baseBlob.h"
 

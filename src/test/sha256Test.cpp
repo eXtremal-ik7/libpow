@@ -4,7 +4,7 @@
 // block of length only, and whole blocks - on unaligned input
 #include "sha256Test.h"
 #include "hashTestUtils.h"
-#include "sha256.h"
+#include "libpow/sha256.h"
 #include <string.h>
 #include <vector>
 

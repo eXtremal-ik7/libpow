@@ -1,9 +1,9 @@
-#include "test/ripemd160Test.h"
-#include "test/scryptTest.h"
-#include "test/sha256Test.h"
-#include "test/sha3Test.h"
-#include "test/uintTest.h"
-#include "test/uintOpsTest.h"
+#include "ripemd160Test.h"
+#include "scryptTest.h"
+#include "sha256Test.h"
+#include "sha3Test.h"
+#include "uintTest.h"
+#include "uintOpsTest.h"
 #include <functional>
 #include <string>
 #include <stdio.h>

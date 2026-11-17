@@ -1,4 +1,4 @@
-#include "sha3.h"
+#include "libpow/sha3.h"
 #include "endianc.h"
 #include <string.h>
 
