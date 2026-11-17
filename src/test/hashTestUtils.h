@@ -17,6 +17,16 @@ inline std::string toHex(const uint8_t *data, size_t size)
   return result;
 }
 
+// Hex to bytes for constants written out in the tests; the input is trusted
+inline void fromHex(const char *hex, uint8_t *out, size_t size)
+{
+  auto digit = [](char c) -> uint8_t {
+    return static_cast<uint8_t>(c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10);
+  };
+  for (size_t i = 0; i < size; i++)
+    out[i] = static_cast<uint8_t>(digit(hex[2 * i]) << 4 | digit(hex[2 * i + 1]));
+}
+
 // The caller's line comes in through the default argument, so a failure points
 // at the check that made it and not at this function
 inline bool checkHash(const uint8_t *hash,

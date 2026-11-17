@@ -1,3 +1,5 @@
+#include "test/ripemd160Test.h"
+#include "test/scryptTest.h"
 #include "test/sha256Test.h"
 #include "test/sha3Test.h"
 #include "test/uintTest.h"
@@ -63,6 +65,14 @@ int main(int, char **)
   runTest(testSha3Lengths, "Sha3::Lengths");
   runTest(testSha3Streaming, "Sha3::Streaming");
   runTest(testSha3LowLevel, "Sha3::LowLevel");
+
+  runTest(testRipemd160Paper, "Ripemd160::Paper");
+  runTest(testRipemd160Lengths, "Ripemd160::Lengths");
+  runTest(testRipemd160Streaming, "Ripemd160::Streaming");
+  runTest(testRipemd160LowLevel, "Ripemd160::LowLevel");
+
+  runTest(testScryptVectors, "Scrypt::Vectors");
+  runTest(testScryptLitecoinGenesis, "Scrypt::LitecoinGenesis");
 
   return numFailed != 0;
 }
