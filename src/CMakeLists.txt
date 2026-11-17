@@ -44,6 +44,7 @@ option(LIBPOW_ARM_CRYPTO "Enable ARM crypto extensions (SHA-256, AES)" OFF)
 
 add_library(pow
   sha256.c
+  sha3.c
 )
 
 target_include_directories(pow PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -67,6 +68,7 @@ if (LIBPOW_BUILD_TESTS)
     test/main.cpp
     test/baseBlobTest.cpp
     test/sha256Test.cpp
+    test/sha3Test.cpp
     test/uintTest.cpp
     test/uintOpsTest.cpp
   )

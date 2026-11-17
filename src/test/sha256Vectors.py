@@ -14,7 +14,7 @@ def splitmix64(state):
         z = ((z ^ (z >> 27)) * 0x94D049BB133111EB) & MASK
         yield z ^ (z >> 31)
 
-# Must match fillTestData() in sha256Test.cpp
+# Must match fillTestData() in hashTestUtils.h and DataSeed in sha256Test.cpp
 DATA_SIZE = 1280
 SEED = 0x5348413235360000
 gen = splitmix64(SEED)

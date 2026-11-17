@@ -3,58 +3,22 @@
 // lengths walk each padding case - tail under 56 bytes, 56..63 with a second
 // block of length only, and whole blocks - on unaligned input
 #include "sha256Test.h"
+#include "hashTestUtils.h"
 #include "sha256.h"
-#include <stdio.h>
 #include <string.h>
-#include <string>
 #include <vector>
 
 namespace {
 
 #include "sha256Vectors.h"
 
-std::string toHex(const uint8_t *data, size_t size) {
-  static const char digits[] = "0123456789abcdef";
-  std::string result;
-  for (size_t i = 0; i < size; i++) {
-    result.push_back(digits[data[i] >> 4]);
-    result.push_back(digits[data[i] & 0x0F]);
-  }
-  return result;
-}
-
-bool cmphash(const uint8_t hash[32], const char *ref, const char *what, size_t size, const char *file, unsigned line) {
-  const std::string got = toHex(hash, 32);
-  if (got != ref) {
-    fprintf(stderr, " * %s:%u %s size=%zu mismatch got %s should be %s\n", file, line, what, size, got.c_str(), ref);
-    return false;
-  }
-
-  return true;
-}
-
-#define CHECK(hash, expected, what, size) \
-  do { if (!cmphash(hash, expected, what, size, __FILE__, __LINE__)) return false; } while (0)
-
-// Must match sha256Vectors.py: splitmix64 from a fixed seed, little endian bytes
+constexpr uint64_t DataSeed = 0x5348413235360000ull;
 constexpr size_t DataSize = 1280;
 constexpr size_t MaxLength = sizeof(Sha256LengthVectors) / sizeof(Sha256LengthVectors[0]);
 static_assert(MaxLength + 16 <= DataSize);
 
-void fillTestData(uint8_t *data) {
-  uint64_t state = 0x5348413235360000ull;
-  for (size_t i = 0; i < DataSize; i += 8) {
-    state += 0x9E3779B97F4A7C15ull;
-    uint64_t z = state;
-    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
-    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
-    z ^= z >> 31;
-    for (size_t j = 0; j < 8; j++)
-      data[i + j] = static_cast<uint8_t>(z >> (8 * j));
-  }
-}
-
-void hashStreaming(const uint8_t *data, size_t size, size_t chunk, uint8_t hash[32]) {
+void hashStreaming(const uint8_t *data, size_t size, size_t chunk, uint8_t hash[32])
+{
   CCtxSha256 ctx;
   sha256Init(&ctx);
   for (size_t offset = 0; offset < size; offset += chunk)
@@ -66,7 +30,11 @@ void hashStreaming(const uint8_t *data, size_t size, size_t chunk, uint8_t hash[
 
 bool testSha256Nist()
 {
-  struct CVector { const char *Message; const char *Hash; };
+  struct CVector {
+    const char *Message;
+    const char *Hash;
+  };
+
   static const CVector vectors[] = {
     {"", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
     {"abc", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"},
@@ -78,26 +46,33 @@ bool testSha256Nist()
     const size_t size = strlen(v.Message);
     uint8_t hash[32];
     sha256(v.Message, size, hash);
-    CHECK(hash, v.Hash, "direct", size);
+    if (!checkHash(hash, 32, v.Hash, "direct", size))
+      return false;
+
     hashStreaming(reinterpret_cast<const uint8_t*>(v.Message), size, size ? size : 1, hash);
-    CHECK(hash, v.Hash, "context", size);
+    if (!checkHash(hash, 32, v.Hash, "context", size))
+      return false;
   }
 
   // One million of 'a': the length field needs more than 16 bits
   const char *million = "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0";
-  std::vector<uint8_t> a(1000000, 'a');
+  const std::vector<uint8_t> a(1000000, 'a');
   uint8_t hash[32];
   sha256(a.data(), a.size(), hash);
-  CHECK(hash, million, "direct", a.size());
+  if (!checkHash(hash, 32, million, "direct", a.size()))
+    return false;
+
   hashStreaming(a.data(), a.size(), 1000, hash);
-  CHECK(hash, million, "context", a.size());
+  if (!checkHash(hash, 32, million, "context", a.size()))
+    return false;
+
   return true;
 }
 
 bool testSha256Lengths()
 {
   uint8_t data[DataSize];
-  fillTestData(data);
+  fillTestData(data, sizeof(data), DataSeed);
 
   for (size_t size = 0; size < MaxLength; size++) {
     // Off by size % 16, so most of the blocks read are unaligned
@@ -107,23 +82,24 @@ bool testSha256Lengths()
 
     memset(hash, 0, sizeof(hash));
     sha256(message, size, hash);
-    CHECK(hash, expected, "direct", size);
+    if (!checkHash(hash, 32, expected, "direct", size))
+      return false;
 
     memset(hash, 0, sizeof(hash));
     hashStreaming(message, size, size ? size : 1, hash);
-    CHECK(hash, expected, "context", size);
+    if (!checkHash(hash, 32, expected, "context", size))
+      return false;
 
     // In three parts: the second one starts inside a partly filled buffer
-    {
-      CCtxSha256 ctx;
-      sha256Init(&ctx);
-      sha256Update(&ctx, message, size / 3);
-      sha256Update(&ctx, message + size / 3, size / 3);
-      sha256Update(&ctx, message + 2 * (size / 3), size - 2 * (size / 3));
-      memset(hash, 0, sizeof(hash));
-      sha256Final(&ctx, hash);
-      CHECK(hash, expected, "context in three parts", size);
-    }
+    CCtxSha256 ctx;
+    sha256Init(&ctx);
+    sha256Update(&ctx, message, size / 3);
+    sha256Update(&ctx, message + size / 3, size / 3);
+    sha256Update(&ctx, message + 2 * (size / 3), size - 2 * (size / 3));
+    memset(hash, 0, sizeof(hash));
+    sha256Final(&ctx, hash);
+    if (!checkHash(hash, 32, expected, "context in three parts", size))
+      return false;
   }
 
   return true;
@@ -132,7 +108,7 @@ bool testSha256Lengths()
 bool testSha256Streaming()
 {
   uint8_t data[DataSize];
-  fillTestData(data);
+  fillTestData(data, sizeof(data), DataSeed);
 
   // Chunk sizes on both sides of the block and of the padding boundary
   static const size_t chunks[] = {1, 3, 7, 55, 56, 57, 63, 64, 65, 127, 128, 129};
@@ -141,7 +117,7 @@ bool testSha256Streaming()
       uint8_t hash[32];
       memset(hash, 0, sizeof(hash));
       hashStreaming(data + size % 16, size, chunk, hash);
-      if (!cmphash(hash, Sha256LengthVectors[size], "streaming", size, __FILE__, __LINE__)) {
+      if (!checkHash(hash, 32, Sha256LengthVectors[size], "streaming", size)) {
         fprintf(stderr, "   chunk=%zu\n", chunk);
         return false;
       }
@@ -160,7 +136,8 @@ bool testSha256Streaming()
     sha256Final(&ctx, hash);
     uint8_t reference[32];
     sha256(data, 128, reference);
-    CHECK(hash, toHex(reference, 32).c_str(), "empty updates", size_t{128});
+    if (!checkHash(hash, 32, toHex(reference, 32).c_str(), "empty updates", 128))
+      return false;
   }
 
   return true;
@@ -185,7 +162,11 @@ bool testSha256LowLevel()
     uint32_t outWords[8];
     memcpy(outWords, out, sizeof(outWords));
     if (memcmp(outWords, expectedState, sizeof(expectedState)) != 0) {
-      fprintf(stderr, " * %s:%u llTransform/llFinal without bswap mismatch\n", __FILE__, __LINE__);
+      const auto location = std::source_location::current();
+      fprintf(stderr,
+              " * %s:%u llTransform/llFinal without bswap mismatch\n",
+              location.file_name(),
+              static_cast<unsigned>(location.line()));
       return false;
     }
   }
@@ -205,7 +186,8 @@ bool testSha256LowLevel()
     sha256llTransform(state, in, 1);
     uint8_t hash[32];
     sha256llFinal(state, hash, 1);
-    CHECK(hash, expected, "llTransform/llFinal with bswap", size_t{3});
+    if (!checkHash(hash, 32, expected, "llTransform/llFinal with bswap", 3))
+      return false;
   }
 
   return true;

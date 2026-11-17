@@ -1,4 +1,5 @@
 #include "test/sha256Test.h"
+#include "test/sha3Test.h"
 #include "test/uintTest.h"
 #include "test/uintOpsTest.h"
 #include <functional>
@@ -56,6 +57,12 @@ int main(int, char **)
   runTest(testSha256Lengths, "Sha256::Lengths");
   runTest(testSha256Streaming, "Sha256::Streaming");
   runTest(testSha256LowLevel, "Sha256::LowLevel");
+
+  runTest(testSha3Nist, "Sha3::Nist");
+  runTest(testSha3Keccak, "Sha3::Keccak");
+  runTest(testSha3Lengths, "Sha3::Lengths");
+  runTest(testSha3Streaming, "Sha3::Streaming");
+  runTest(testSha3LowLevel, "Sha3::LowLevel");
 
   return numFailed != 0;
 }
