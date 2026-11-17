@@ -1,0 +1,21 @@
+#pragma once
+
+bool testUintShl();
+bool testUintShr();
+bool testUintMul64();
+bool testUintMul();
+bool testUintDivmod();
+bool testUintAdd64();
+bool testUintAdd();
+bool testUintSub64();
+bool testUintSub();
+bool testUintDiv64();
+bool testUintMod64();
+bool testUintCmp();
+bool testUintCmp64();
+bool testUintCompact();
+bool testUintGetDouble();
+bool testUintFromDouble();
+bool testUintMulDouble();
+bool testUintFpdiv();
+bool testUintGetDecimal();
